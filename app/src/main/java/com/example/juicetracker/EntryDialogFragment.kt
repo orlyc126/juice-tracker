@@ -1,4 +1,6 @@
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+package com.example.juicetracker
+
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,16 +13,18 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import com.example.juicetracker.data.JuiceColor
+import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import com.example.juicetracker.ui.AppViewModelProvider
 import com.example.juicetracker.ui.EntryViewModel
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class EntryDialogFragment : BottomSheetDialogFragment() {
 
     private val entryViewModel by viewModels<EntryViewModel> { AppViewModelProvider.Factory }
+    var selectedColor: JuiceColor = JuiceColor.Red
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,8 +34,7 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
         return FragmentEntryDialogBinding.inflate(inflater, container, false).root
     }
 
-    var selectedColor: JuiceColor = JuiceColor.Red
-
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val colorLabelMap = JuiceColor.values().associateBy { getString(it.label) }
         val binding = FragmentEntryDialogBinding.bind(view)
@@ -56,13 +59,11 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
             // Enable Save button if the current text is longer than 3 characters
             binding.saveButton.isEnabled = (start+count) > 0
         }
-
         binding.colorSpinner.adapter = ArrayAdapter(
             requireContext(),
             layout.support_simple_spinner_dropdown_item,
             colorLabelMap.map { it.key }
         )
-
         binding.colorSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
@@ -77,7 +78,7 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
                 selectedColor = JuiceColor.Red
             }
         }
-        
+
         binding.saveButton.setOnClickListener {
             entryViewModel.saveJuice(
                 juiceId,
