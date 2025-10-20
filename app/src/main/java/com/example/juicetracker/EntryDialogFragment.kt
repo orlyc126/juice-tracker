@@ -26,6 +26,7 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val binding = FragmentEntryDialogBinding.bind(view)
         val juiceId = arguments?.getLong("itemId", 0L) ?: 0L
+
         binding.saveButton.setOnClickListener {
             entryViewModel.saveJuice(
                 juiceId,
@@ -34,6 +35,10 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
                 selectedColor.name,
                 binding.ratingBar.rating.toInt()
             )
+            dismiss()
+        }
+
+        binding.cancelButton.setOnClickListener {
             dismiss()
         }
     }
