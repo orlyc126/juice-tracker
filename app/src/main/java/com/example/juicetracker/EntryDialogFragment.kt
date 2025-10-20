@@ -7,11 +7,16 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.R.layout
 import androidx.core.widget.doOnTextChanged
-import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import com.example.juicetracker.data.JuiceColor
 import com.example.juicetracker.ui.AppViewModelProvider
 import com.example.juicetracker.ui.EntryViewModel
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 class EntryDialogFragment : BottomSheetDialogFragment() {
 
@@ -31,6 +36,21 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
         val colorLabelMap = JuiceColor.values().associateBy { getString(it.label) }
         val binding = FragmentEntryDialogBinding.bind(view)
         val juiceId = arguments?.getLong("itemId", 0L) ?: 0L
+
+        if (juiceId > 0) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    entryViewModel.getJuiceStream(juiceId).filterNotNull().collect { item ->
+                        with(binding){
+                            name.setText(item.name)
+                            description.setText(item.description)
+                            ratingBar.rating = item.rating.toFloat()
+                            colorSpinner.setSelection(findColorIndex(item.color))
+                        }
+                    }
+                }
+            }
+        }
 
         binding.name.doOnTextChanged { _, start, _, count ->
             // Enable Save button if the current text is longer than 3 characters
@@ -57,7 +77,7 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
                 selectedColor = JuiceColor.Red
             }
         }
-
+        
         binding.saveButton.setOnClickListener {
             entryViewModel.saveJuice(
                 juiceId,
