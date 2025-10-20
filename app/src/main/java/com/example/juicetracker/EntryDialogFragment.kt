@@ -5,10 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import androidx.fragment.app.viewModels
+import com.example.juicetracker.data.JuiceColor
 import com.example.juicetracker.ui.AppViewModelProvider
 import com.example.juicetracker.ui.EntryViewModel
-
-
 
 class EntryDialogFragment : BottomSheetDialogFragment() {
 
@@ -22,7 +21,20 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
         return FragmentEntryDialogBinding.inflate(inflater, container, false).root
     }
 
+    var selectedColor: JuiceColor = JuiceColor.Red
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val binding = FragmentEntryDialogBinding.bind(view)
+        val juiceId = arguments?.getLong("itemId", 0L) ?: 0L
+        binding.saveButton.setOnClickListener {
+            entryViewModel.saveJuice(
+                juiceId,
+                binding.name.text.toString(),
+                binding.description.text.toString(),
+                selectedColor.name,
+                binding.ratingBar.rating.toInt()
+            )
+            dismiss()
+        }
     }
 }
