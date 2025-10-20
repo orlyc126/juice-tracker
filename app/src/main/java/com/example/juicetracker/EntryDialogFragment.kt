@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.R.layout
+import androidx.core.widget.doOnTextChanged
 import com.example.juicetracker.databinding.FragmentEntryDialogBinding
 import androidx.fragment.app.viewModels
 import com.example.juicetracker.data.JuiceColor
@@ -30,6 +31,11 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
         val colorLabelMap = JuiceColor.values().associateBy { getString(it.label) }
         val binding = FragmentEntryDialogBinding.bind(view)
         val juiceId = arguments?.getLong("itemId", 0L) ?: 0L
+
+        binding.name.doOnTextChanged { _, start, _, count ->
+            // Enable Save button if the current text is longer than 3 characters
+            binding.saveButton.isEnabled = (start+count) > 0
+        }
 
         binding.colorSpinner.adapter = ArrayAdapter(
             requireContext(),
@@ -67,5 +73,10 @@ class EntryDialogFragment : BottomSheetDialogFragment() {
         binding.cancelButton.setOnClickListener {
             dismiss()
         }
+    }
+
+    private fun findColorIndex(color: String): Int {
+        val juiceColor = JuiceColor.valueOf(color)
+        return JuiceColor.values().indexOf(juiceColor)
     }
 }
